@@ -24,9 +24,15 @@ profile.cov
 go.work
 go.work.sum
 
+# Go build folder
+build/
+
 # env file
 .env
 
+# commit file
+commit.txt
+
 # Editor/IDE
 # .idea/
-# .vscode/
+.vscode/
