@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-scraper-learning/internal/config"
 )
 
 var (
@@ -15,4 +16,5 @@ var (
 
 func main() {
 	fmt.Println("Learn scrapping project initialization.")
+	config.LoadConfig()
 }

@@ -2,7 +2,7 @@ Name = Go Scraper Learning
 Author = oscarcsg
 Description = Proyecto para aprender a hacer web scrapping en Go usando goquery.
 
-Version = dev-0.1.0
+Version = dev-0.2.0
 
 BuildTime = $(shell date +"%Y-%m-%d %H:%M:%S")
 CommitID = $(shell git rev-parse --short HEAD)
