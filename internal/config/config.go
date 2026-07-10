@@ -4,17 +4,21 @@ import (
 	"fmt"
 	"go-scraper-learning/internal/util"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
 )
 
-// Database (return: engine, conn string and error)
+// ---------------------------------- //
+// -------- DATABASE METHODS -------- //
+// ---------------------------------- //
+// (return: engine, conn string and error)
 func loadDatabaseConfig() (string, string, error) {
 	engine := util.TrimToLowerString(os.Getenv("DB_ENGINE"))
 	//fmt.Println(engine)
 	if engine == "" {
-		fmt.Println("FATAL: database engine MUST be defined.")
+		fmt.Println("FATAL: database engine MUST be defined.") // Log
 		os.Exit(1)
 	}
 
@@ -34,7 +38,7 @@ func loadDatabaseConfig() (string, string, error) {
 
 		if len(errors) > 0 {
 			for _, err := range errors {
-				fmt.Println(err)
+				fmt.Println(err) // Log
 			}
 			os.Exit(1)
 		}
@@ -78,7 +82,7 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 	values := make([]string, 0, 5)
 	errors := make([]error, 0, 5)
 
-	envVars := map[string]string{
+	errorMsgs := map[string]string{
 		"DB_USER":          "Database server user not found in the environment.",
 		"DB_USER_PASSWORD": "Database server user password not found in the environment.",
 		"DB_IP_URL":        "Database server IP or URL not found in the environment.",
@@ -93,7 +97,7 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 	for _, key := range keys {
 		value := strings.TrimSpace(os.Getenv(key))
 		if value == "" {
-			errors = append(errors, fmt.Errorf("FATAL: %s", envVars[key]))
+			errors = append(errors, fmt.Errorf("FATAL: %s", errorMsgs[key]))
 		} else {
 			values = append(values, value)
 		}
@@ -103,8 +107,47 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 }
 
 
+// ---------------------------------- //
+// -------- LOGGING METHODS --------- //
+// ---------------------------------- //
+// (return: struct LogConfig)
+func loadLogConfig() (LogConfig) {
+	errors := make([]error, 0, 6)
 
+	config := LogConfig{
+		FilePath: getStringEnv("LOG_FILE_NAME", &errors),
+		FileMaxSize: getUint16Env("LOG_FILE_MAX_SIZE", &errors),
+		FileMaxAge: getUint16Env("LOG_FILE_MAX_AGE", &errors),
+		FileMaxBackups: getUint8Env("LOG_FILE_MAX_BACKUPS", &errors),
+		FileCompress: getBoolEnv("LOG_FILE_COMPRESS", &errors),
+		Terminal: getBoolEnv("LOG_TERMINAL", &errors),
+	}
+
+	// Print errors and exit the program
+	if len(errors) > 0 {
+		for _, err := range errors {
+			fmt.Println(err) // Log
+		}
+		os.Exit(1)
+	}
+
+	// Create the logconfig and return
+	return config
+}
+
+
+
+// ---------------------------------- //
+// -------- TEL LOG METHODS --------- //
+// ---------------------------------- //
+// (return: struct TelegramLogConfig)
+
+
+
+
+// ---------------------------------- //
 // ------ GLOBAL PUBLIC METHOD ------ //
+// ---------------------------------- //
 func LoadConfig()  {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("IMPORTANTE: '.env' file not found. Reading system environment variables...")
@@ -113,9 +156,79 @@ func LoadConfig()  {
 	dbEngine, dbString, err := loadDatabaseConfig()
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err) // Log
 		os.Exit(1)
 	}
 
 	fmt.Printf("\nEngine: %s; Connection String: %s", dbEngine, dbString)
+
+	logConfig := loadLogConfig()
+
+	loadTelegramLogConfig()
+}
+
+
+
+// ---------------------------------- //
+// -------- UTILITY METHODS --------- //
+// ---------------------------------- //
+func getStringEnv(envKey string, errors *[]error) (string) {
+	txt := strings.TrimSpace(os.Getenv(envKey))
+	if txt == "" {
+		*errors = append(*errors, fmt.Errorf("FATAL: %s variable is empty or does not exist.", envKey))
+	}
+	return txt
+}
+
+func getStringEnvTrimLower(envKey string, errors *[]error) (string) {
+	txt := util.TrimToLowerString(os.Getenv(envKey))
+	if txt == "" {
+		*errors = append(*errors, fmt.Errorf("FATAL: %s variable is empty or does not exist.", envKey))
+	}
+	return txt
+}
+
+func getUint8Env(envKey string, errors *[]error) (uint8) {
+	txt := getStringEnv(envKey, errors)
+	if txt == "" {
+		// Error msg has been already written in the previous method
+		return 0
+	}
+
+	value, err := util.ParseUint8(txt)
+	if err != nil {
+		*errors = append(*errors, fmt.Errorf("FATAL: %s variable value is not valid.", envKey))
+		return 0
+	}
+	return value
+}
+
+func getUint16Env(envKey string, errors *[]error) (uint16) {
+	txt := getStringEnv(envKey, errors)
+	if txt == "" {
+		// Error msg has been already written in the previous method
+		return 0
+	}
+
+	value, err := util.ParseUint16(txt)
+	if err != nil {
+		*errors = append(*errors, fmt.Errorf("FATAL: %s variable value is not valid.", envKey))
+		return 0
+	}
+	return value
+}
+
+func getBoolEnv(envKey string, errors *[]error) (bool) {
+	txt := getStringEnv(envKey, errors)
+	if txt == "" {
+		// Error msg has been already written in the previous method
+		return false
+	}
+
+	value, err := strconv.ParseBool(txt)
+	if err != nil {
+		*errors = append(*errors, fmt.Errorf("FATAL: %s variable value is not valid.", envKey))
+		return false
+	}
+	return value
 }
