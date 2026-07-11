@@ -15,6 +15,7 @@ var (
 )
 
 func main() {
-	fmt.Println("Learn scrapping project initialization.")
-	config.LoadConfig()
+	fmt.Println("Learn scrapping project initialization.") // Log
+
+	appConfig := config.LoadConfig()
 }

@@ -1,8 +1,8 @@
 package config
 
 type AppConfig struct {
+	ExtLogs  ExternalLogConfig
 	Logs     LogConfig
-	TelLogs  TelegramLogConfig
 	DBEngine string
 	DBString string
 }

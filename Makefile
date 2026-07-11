@@ -2,15 +2,15 @@ Name = Go Scraper Learning
 Author = oscarcsg
 Description = This project is used to learn how to web scrap in Go using goquery and databases.
 
-Version = dev-0.4.0
+Version = dev-0.5.0
 
-BuildTime = $(shell date +"%Y-%m-%d %H:%M:%S")
-CommitID = $(shell git rev-parse --short HEAD)
+# BuildTime = $(shell date +"%Y-%m-%d %H:%M:%S")   ---   -X 'main.BuildTime=$(BuildTime)'
+# CommitID = $(shell git rev-parse --short HEAD)   ---   -X 'main.CommitID=$(CommitID)'
 
 
-LDFLAGS = -ldflags="-X 'main.Name=$(Name)' -X 'main.Author=$(Author)' -X 'main.Description=$(Description)' -X 'main.Version=$(Version)' -X 'main.BuildTime=$(BuildTime)' -X 'main.CommitID=$(CommitID)'"
+LDFLAGS = -ldflags="-X 'main.Name=$(Name)' -X 'main.Author=$(Author)' -X 'main.Description=$(Description)' -X 'main.Version=$(Version)'"
 
-BUILD_OUT = build/scraper
+BUILD_OUT = build/scraper-$(Version)
 
 MAIN_FUNC = cmd/scraper/main.go
 

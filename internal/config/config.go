@@ -36,12 +36,7 @@ func loadDatabaseConfig() (string, string, error) {
 		// Get the values from the env (and possible errors)
 		values, errors := getAndCheckServerDatabaseParameters()
 
-		if len(errors) > 0 {
-			for _, err := range errors {
-				fmt.Println(err) // Log
-			}
-			os.Exit(1)
-		}
+		printAllErrors(&errors)
 
 		// Values should be in this order: user, userPsw, ipUrl, port, dbName
 		if len(values) != 5 {
@@ -112,7 +107,7 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 // ---------------------------------- //
 // (return: struct LogConfig)
 func loadLogConfig() (LogConfig) {
-	errors := make([]error, 0, 6)
+	errors := make([]error, 0, 11)
 
 	config := LogConfig{
 		FilePath: getStringEnv("LOG_FILE_NAME", &errors),
@@ -124,12 +119,7 @@ func loadLogConfig() (LogConfig) {
 	}
 
 	// Print errors and exit the program
-	if len(errors) > 0 {
-		for _, err := range errors {
-			fmt.Println(err) // Log
-		}
-		os.Exit(1)
-	}
+	printAllErrors(&errors)
 
 	// Create the logconfig and return
 	return config
@@ -138,17 +128,40 @@ func loadLogConfig() (LogConfig) {
 
 
 // ---------------------------------- //
-// -------- TEL LOG METHODS --------- //
+// -------- EXT LOG METHODS --------- //
 // ---------------------------------- //
-// (return: struct TelegramLogConfig)
+// (return: struct ExternalLogConfig)
+func loadExternalLogConfig() (ExternalLogConfig) {
+	errors := make([]error, 0, 5)
 
+	provider := getStringEnvTrimLower("EXTERNAL_LOG_PROVIDER", &errors)
+
+	extLogConfig := ExternalLogConfig{}
+
+	extLogConfig.Provider = provider
+	
+	switch provider {
+	case "telegram":
+		extLogConfig.TelChatId = getStringEnv("EXTERNAL_TELEGRAM_CHAT_ID", &errors)
+		extLogConfig.TelBotToken = getStringEnv("EXTERNAL_TELEGRAM_TOKEN", &errors)
+
+	case "webhook":
+		extLogConfig.WebhookURL = getStringEnv("EXTERNAL_WEBHOOK_URL", &errors)
+		// Auth Header is optional, so I'll use the regular os.Getenv()
+		extLogConfig.WebhookAuthHeader = strings.TrimSpace(os.Getenv("EXTERNAL_WEBHOOK_AUTH_HEADER"))
+	}
+
+	printAllErrors(&errors)
+
+	return extLogConfig
+}
 
 
 
 // ---------------------------------- //
 // ------ GLOBAL PUBLIC METHOD ------ //
 // ---------------------------------- //
-func LoadConfig()  {
+func LoadConfig() AppConfig {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("IMPORTANTE: '.env' file not found. Reading system environment variables...")
 	}
@@ -164,7 +177,14 @@ func LoadConfig()  {
 
 	logConfig := loadLogConfig()
 
-	loadTelegramLogConfig()
+	extLogConfig := loadExternalLogConfig()
+
+	return AppConfig{
+		ExtLogs: extLogConfig,
+		Logs: logConfig,
+		DBEngine: dbEngine,
+		DBString: dbString,
+	}
 }
 
 
@@ -231,4 +251,13 @@ func getBoolEnv(envKey string, errors *[]error) (bool) {
 		return false
 	}
 	return value
+}
+
+func printAllErrors(errors *[]error) {
+	if len(*errors) > 0 {
+		for _, err := range *errors {
+			fmt.Println(err) // Log
+		}
+		os.Exit(1)
+	}
 }
