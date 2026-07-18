@@ -6,6 +6,7 @@ import (
 	"go-scraper-learning/internal/util"
 	"os"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -116,6 +117,20 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 	} else {
 		alwaysLog = zap.NewNop()
 	}
+}
+
+// Call Close using defer in main()
+
+func Close() {
+	if zapLog != nil {
+		_ = zapLog.Sync()
+	}
+	if alwaysLog != nil {
+		_ = alwaysLog.Sync()
+	}
+
+	// Give 5 seconds so the logging system can empty as many logs as it can from the alertChannel
+	time.Sleep(5 * time.Second)
 }
 
 

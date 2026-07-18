@@ -27,8 +27,6 @@ func LoadConfig() AppConfig {
 		os.Exit(1)
 	}
 
-	fmt.Printf("\nEngine: %s; Connection String: %s", dbEngine, dbString)
-
 	logConfig := loadLogConfig()
 
 	extLogConfig := loadExternalLogConfig()

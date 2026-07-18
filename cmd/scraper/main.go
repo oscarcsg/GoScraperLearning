@@ -16,7 +16,16 @@ var (
 )
 
 func main() {
-	fmt.Println("Learn scrapping project initialization.") // Log
-
 	appConfig := config.LoadConfig()
+
+	logging.Init(appConfig.Logs, appConfig.ExtLogs)
+	defer logging.Close()
+
+	initialMsg := fmt.Sprintf(
+		"------ %s - Launched in Version %s ------",
+		Name,
+		Version,
+	)
+
+	logging.Always(initialMsg)
 }

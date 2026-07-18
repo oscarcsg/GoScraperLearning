@@ -36,6 +36,9 @@ commit.txt
 # libraries list
 libraries.md
 
+# log files
+logs/
+
 # Editor/IDE
 # .idea/
 .vscode/
