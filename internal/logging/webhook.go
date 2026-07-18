@@ -78,9 +78,9 @@ func queueAlert(lvl Level, msg string, fields []Field) {
 
 	select {
 	case alertChannel <- alertPayload{Level: lvl, Message: msg, Fields: fields}:
-		// Guardado en el buffer
+		// Stored in the buffer
 	default:
-		// El buffer de 100 está lleno. Sumamos 1 directamente en la memoria caché del procesador.
+		// The buffer is full, add 1 directly to the atomic counter
 		droppedLogs.Add(1)
 	}
 }
@@ -94,7 +94,7 @@ func sendAlert(payload alertPayload) {
 	}
 }
 
-// -- Conversores auxiliares --
+// --- Auxiliar Conversors ---
 
 func levelToString(lvl Level) string {
 	switch lvl {
@@ -109,6 +109,7 @@ func levelToString(lvl Level) string {
 
 func getEmoji(lvl Level) string {
 	switch lvl {
+	case DEBUG: return "🐞"
 	case INFO:  return "ℹ️"
 	case WARN:  return "⚠️"
 	case ERROR: return "❌"
@@ -117,14 +118,20 @@ func getEmoji(lvl Level) string {
 	}
 }
 
-// -- Integraciones HTTP --
+// --- HTTP Integrations ---
 
 func sendTelegram(payload alertPayload) {
 	lvlStr := levelToString(payload.Level)
 	
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s <b>[%s]</b> - %s\n\n%s", 
-		getEmoji(payload.Level), lvlStr, time.Now().UTC().Format("2006-01-02 15:04:05 MST"), payload.Message))
+	fmt.Fprintf(
+		&sb,
+		"%s <b>[%s]</b> - %s\n\n%s",
+		getEmoji(payload.Level),
+		lvlStr,
+		time.Now().UTC().Format("2006-01-02 15:04:05 MST"),
+		payload.Message,
+	)
 
 	// Volcamos los fields de Zap a un mapa para visualizarlos en Telegram
 	if len(payload.Fields) > 0 {
@@ -133,21 +140,44 @@ func sendTelegram(payload alertPayload) {
 			f.AddTo(enc)
 		}
 		
-		sb.WriteString("\n\n<b><i>Detalles:</i></b>\n<code>")
+		sb.WriteString("\n\n<b><i>Details:</i></b>\n<code>")
 		for k, v := range enc.Fields {
-			sb.WriteString(fmt.Sprintf("%s: %+v\n", k, v))
+			fmt.Fprintf(
+				&sb,
+				"%s: %+v\n",
+				k,
+				v,
+			)
 		}
 		sb.WriteString("</code>")
 	}
 
-	body, _ := json.Marshal(map[string]string{
+	body, err := json.Marshal(map[string]string{
 		"chat_id":    externalConfig.TelChatId,
 		"text":       sb.String(),
 		"parse_mode": "HTML",
 	})
+	// If failed creating the json, cancel
+	if err != nil {
+		return
+	}
 
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", externalConfig.TelBotToken)
-	http.Post(url, "application/json", bytes.NewBuffer(body))
+	
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	if err != nil {
+		return 
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// 5 seconds of timeout to avoid infinite waiting
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Do(req)
+	
+	// If petition had no errors, close the TCP connection
+	if err == nil {
+		resp.Body.Close()
+	}
 }
 
 func sendGenericWebhook(payload alertPayload) {
@@ -156,14 +186,21 @@ func sendGenericWebhook(payload alertPayload) {
 		f.AddTo(enc)
 	}
 
-	body, _ := json.Marshal(map[string]any{
+	body, err := json.Marshal(map[string]any{
 		"level":   levelToString(payload.Level),
 		"message": payload.Message,
 		"time":    time.Now().UTC().Format(time.RFC3339),
 		"fields":  enc.Fields,
 	})
+	if err != nil {
+		return
+	}
 
-	req, _ := http.NewRequest("POST", externalConfig.WebhookURL, bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", externalConfig.WebhookURL, bytes.NewBuffer(body))
+	// Check the error. If it is not nil, it means req is no valid, so just don't use it and close the method
+	if err != nil {
+		return
+	}
 	req.Header.Set("Content-Type", "application/json")
 	
 	if externalConfig.WebhookAuthHeader != "" {
@@ -171,5 +208,10 @@ func sendGenericWebhook(payload alertPayload) {
 	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	client.Do(req)
+	resp, err := client.Do(req)
+	
+	// If petition had no errors, close the TCP connection
+	if err == nil {
+		resp.Body.Close()
+	}
 }
