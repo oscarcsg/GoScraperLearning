@@ -33,6 +33,9 @@ build/
 # commit file
 commit.txt
 
+# libraries list
+libraries.md
+
 # Editor/IDE
 # .idea/
 .vscode/

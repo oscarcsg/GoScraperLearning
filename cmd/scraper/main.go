@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-scraper-learning/internal/config"
+	"go-scraper-learning/internal/logging"
 )
 
 var (

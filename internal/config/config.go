@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"go-scraper-learning/internal/logging"
 	"go-scraper-learning/internal/util"
 	"os"
 	"strconv"
@@ -106,10 +107,10 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 // -------- LOGGING METHODS --------- //
 // ---------------------------------- //
 // (return: struct LogConfig)
-func loadLogConfig() (LogConfig) {
+func loadLogConfig() (logging.LogConfig) {
 	errors := make([]error, 0, 11)
 
-	config := LogConfig{
+	config := logging.LogConfig{
 		FilePath: getStringEnv("LOG_FILE_NAME", &errors),
 		FileMaxSize: getUint16Env("LOG_FILE_MAX_SIZE", &errors),
 		FileMaxAge: getUint16Env("LOG_FILE_MAX_AGE", &errors),
@@ -131,12 +132,12 @@ func loadLogConfig() (LogConfig) {
 // -------- EXT LOG METHODS --------- //
 // ---------------------------------- //
 // (return: struct ExternalLogConfig)
-func loadExternalLogConfig() (ExternalLogConfig) {
+func loadExternalLogConfig() (logging.ExternalLogConfig) {
 	errors := make([]error, 0, 5)
 
 	provider := getStringEnvTrimLower("EXTERNAL_LOG_PROVIDER", &errors)
 
-	extLogConfig := ExternalLogConfig{}
+	extLogConfig := logging.ExternalLogConfig{}
 
 	extLogConfig.Provider = provider
 	
@@ -161,6 +162,7 @@ func loadExternalLogConfig() (ExternalLogConfig) {
 // ---------------------------------- //
 // ------ GLOBAL PUBLIC METHOD ------ //
 // ---------------------------------- //
+
 func LoadConfig() AppConfig {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("IMPORTANTE: '.env' file not found. Reading system environment variables...")
