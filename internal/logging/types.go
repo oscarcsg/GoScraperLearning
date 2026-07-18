@@ -41,10 +41,11 @@ type minLogLevels struct {
 type Level uint8
 
 const (
-	NONE  Level = 0
-	DEBUG Level = 1
-	INFO  Level = 2
-	WARN  Level = 3
-	ERROR Level = 4
-	FATAL Level = 5
+	ALWAYS Level = 0
+	DEBUG  Level = 1
+	INFO   Level = 2
+	WARN   Level = 3
+	ERROR  Level = 4
+	FATAL  Level = 5
+	NONE   Level = 6
 )

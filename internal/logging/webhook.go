@@ -98,23 +98,25 @@ func sendAlert(payload alertPayload) {
 
 func levelToString(lvl Level) string {
 	switch lvl {
-	case DEBUG: return "DEBUG"
-	case INFO:  return "INFO"
-	case WARN:  return "WARN"
-	case ERROR: return "ERROR"
-	case FATAL: return "FATAL"
-	default:    return "UNKNOWN"
+	case ALWAYS: return "ALWAYS"
+	case DEBUG:  return "DEBUG"
+	case INFO:   return "INFO"
+	case WARN:   return "WARN"
+	case ERROR:  return "ERROR"
+	case FATAL:  return "FATAL"
+	default:     return "UNKNOWN"
 	}
 }
 
 func getEmoji(lvl Level) string {
 	switch lvl {
-	case DEBUG: return "🐞"
-	case INFO:  return "ℹ️"
-	case WARN:  return "⚠️"
-	case ERROR: return "❌"
-	case FATAL: return "🚨"
-	default:    return "🐛"
+	case ALWAYS: return "📢"
+	case DEBUG:  return "🐞"
+	case INFO:   return "ℹ️"
+	case WARN:   return "⚠️"
+	case ERROR:  return "❌"
+	case FATAL:  return "🚨"
+	default:     return "🐛"
 	}
 }
 

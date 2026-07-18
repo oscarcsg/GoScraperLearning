@@ -13,6 +13,8 @@ import (
 )
 
 var zapLog *zap.Logger
+var alwaysLog *zap.Logger
+
 var minLevels minLogLevels = minLogLevels{}
 
 func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
@@ -29,6 +31,7 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 
 	// Cores (where it will log)
 	var cores []zapcore.Core
+	var alwaysCores []zapcore.Core
 
 	// Configure terminal
 	if logConfig.Terminal && minLevels.TerminalLogMinLevel != NONE {
@@ -45,10 +48,12 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 				toZapLevel(minLevels.TerminalLogMinLevel),
 			),
 		)
+		// Ignore the Level and logs EVERYTHING
+		alwaysCores = append(alwaysCores, zapcore.NewCore(consoleEncoder, consoleWriter, zap.DebugLevel))
 	}
 
 	// Configure file
-	if minLevels.FileLogMinLevel != NONE {
+	if minLevels.FileLogMinLevel != NONE && logConfig.FilePath != "" {
 		// Configure lumberjack
 		fileWriter := zapcore.AddSync(&lumberjack.Logger{
 			Filename:   logConfig.FilePath,
@@ -81,6 +86,16 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 				toZapLevel(minLevels.FileLogMinLevel),
 			),
 		)
+
+		// Ignore the Level and logs EVERYTHING
+		alwaysCores = append(
+			alwaysCores,
+			zapcore.NewCore(
+				fileEncoder,
+				fileWriter,
+				zap.DebugLevel,
+			),
+		)
 	}
 
 	// Initialize async worker for external logging
@@ -88,9 +103,19 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 		startAlertWorker(extLogConfig)
 	}
 
-	// Create the instance
+	// Create the instances
 	// AddCallerSkip(1) will write the real file that made the log, not this file
-	zapLog = zap.New(zapcore.NewTee(cores...), zap.AddCallerSkip(1))
+	if len(cores) > 0 {
+		zapLog = zap.New(zapcore.NewTee(cores...), zap.AddCallerSkip(1))
+	} else {
+		zapLog = zap.NewNop()
+	}
+
+	if len(alwaysCores) > 0 {
+		alwaysLog = zap.New(zapcore.NewTee(alwaysCores...), zap.AddCallerSkip(1))
+	} else {
+		alwaysLog = zap.NewNop()
+	}
 }
 
 
@@ -98,6 +123,11 @@ func Init(logConfig LocalLogConfig, extLogConfig ExternalLogConfig) {
 // --------------------------------- //
 //            OPERATIONS             //
 // --------------------------------- //
+
+func Always(msg string, fields ...Field) {
+	alwaysLog.Info(msg, fields...)
+	queueAlert(ALWAYS, msg, fields)
+}
 
 func Debug(msg string, fields ...Field) {
 	zapLog.Debug(msg, fields...)
