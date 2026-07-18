@@ -9,9 +9,11 @@ type ExternalLogConfig struct {
 	WebhookAuthHeader string
 }
 
-type LogConfig struct {
+type LocalLogConfig struct {
 	FilePath          string
 	GlobalMinLevel    string
+	TerminalMinLevel  string
+	FileMinLevel      string
 	FileMaxSize       uint16
 	FileMaxAge        uint16
 	FileMaxBackups    uint8
@@ -26,8 +28,10 @@ type alertPayload struct {
 }
 
 type minLogLevels struct {
-	MinGlobalLogLevel   Level
-	MinExternalLogLevel Level
+	GlobalLogMinLevel   Level
+	TerminalLogMinLevel Level
+	FileLogMinLevel     Level
+	ExternalLogMinLevel Level
 }
 
 

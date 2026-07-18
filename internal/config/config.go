@@ -12,6 +12,38 @@ import (
 )
 
 // ---------------------------------- //
+// ------ GLOBAL PUBLIC METHOD ------ //
+// ---------------------------------- //
+
+func LoadConfig() AppConfig {
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("IMPORTANTE: '.env' file not found. Reading system environment variables...")
+	}
+
+	dbEngine, dbString, err := loadDatabaseConfig()
+
+	if err != nil {
+		fmt.Println(err) // Log
+		os.Exit(1)
+	}
+
+	fmt.Printf("\nEngine: %s; Connection String: %s", dbEngine, dbString)
+
+	logConfig := loadLogConfig()
+
+	extLogConfig := loadExternalLogConfig()
+
+	return AppConfig{
+		ExtLogs: extLogConfig,
+		Logs: logConfig,
+		DBEngine: dbEngine,
+		DBString: dbString,
+	}
+}
+
+
+
+// ---------------------------------- //
 // -------- DATABASE METHODS -------- //
 // ---------------------------------- //
 // (return: engine, conn string and error)
@@ -107,10 +139,10 @@ func getAndCheckServerDatabaseParameters() ([]string, []error) {
 // -------- LOGGING METHODS --------- //
 // ---------------------------------- //
 // (return: struct LogConfig)
-func loadLogConfig() (logging.LogConfig) {
+func loadLogConfig() (logging.LocalLogConfig) {
 	errors := make([]error, 0, 11)
 
-	config := logging.LogConfig{
+	config := logging.LocalLogConfig{
 		FilePath: getStringEnv("LOG_FILE_NAME", &errors),
 		FileMaxSize: getUint16Env("LOG_FILE_MAX_SIZE", &errors),
 		FileMaxAge: getUint16Env("LOG_FILE_MAX_AGE", &errors),
@@ -155,38 +187,6 @@ func loadExternalLogConfig() (logging.ExternalLogConfig) {
 	printAllErrors(&errors)
 
 	return extLogConfig
-}
-
-
-
-// ---------------------------------- //
-// ------ GLOBAL PUBLIC METHOD ------ //
-// ---------------------------------- //
-
-func LoadConfig() AppConfig {
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("IMPORTANTE: '.env' file not found. Reading system environment variables...")
-	}
-
-	dbEngine, dbString, err := loadDatabaseConfig()
-
-	if err != nil {
-		fmt.Println(err) // Log
-		os.Exit(1)
-	}
-
-	fmt.Printf("\nEngine: %s; Connection String: %s", dbEngine, dbString)
-
-	logConfig := loadLogConfig()
-
-	extLogConfig := loadExternalLogConfig()
-
-	return AppConfig{
-		ExtLogs: extLogConfig,
-		Logs: logConfig,
-		DBEngine: dbEngine,
-		DBString: dbString,
-	}
 }
 
 
