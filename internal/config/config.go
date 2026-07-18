@@ -144,6 +144,9 @@ func loadLogConfig() (logging.LocalLogConfig) {
 
 	config := logging.LocalLogConfig{
 		FilePath: getStringEnv("LOG_FILE_NAME", &errors),
+		GlobalMinLevel: getStringEnv("LOG_GLOBAL_MIN_LEVEL", &errors),
+		TerminalMinLevel: getStringEnv("LOG_TERMINAL_MIN_LEVEL", &errors),
+		FileMinLevel: getStringEnv("LOG_FILE_MIN_LEVEL", &errors),
 		FileMaxSize: getUint16Env("LOG_FILE_MAX_SIZE", &errors),
 		FileMaxAge: getUint16Env("LOG_FILE_MAX_AGE", &errors),
 		FileMaxBackups: getUint8Env("LOG_FILE_MAX_BACKUPS", &errors),
@@ -172,6 +175,7 @@ func loadExternalLogConfig() (logging.ExternalLogConfig) {
 	extLogConfig := logging.ExternalLogConfig{}
 
 	extLogConfig.Provider = provider
+	extLogConfig.MinLevel = getStringEnvTrimLower("EXTERNAL_LOG_MIN_LEVEL", &errors)
 	
 	switch provider {
 	case "telegram":
