@@ -5,6 +5,7 @@ import (
 	"go-scraper-learning/internal/config"
 	"go-scraper-learning/internal/database"
 	"go-scraper-learning/internal/logging"
+	"go-scraper-learning/internal/scrapper"
 )
 
 var (
@@ -41,4 +42,10 @@ func main() {
 		)
 	}
 	defer db.Close()
+
+	// --- SCRAPPER --- //
+	scrapper.Init(
+		"https://books.toscrape.com/",
+		"historial/historial-dev.txt",
+	)
 }
