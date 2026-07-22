@@ -19,9 +19,11 @@ var (
 func main() {
 	appConfig := config.LoadConfig()
 
+	// --- LOGGING INITIALIZATION --- //
 	logging.Init(appConfig.Logs, appConfig.ExtLogs)
 	defer logging.Close()
 
+	// --- LAUNCH MESSAGE --- //
 	initialMsg := fmt.Sprintf(
 		"------ %s - Launched in Version %s ------",
 		Name,
@@ -30,6 +32,7 @@ func main() {
 
 	logging.Always(initialMsg)
 
+	// --- DATABASE INITIALIZATION --- //
 	db, err := database.Init(appConfig.DBConfig)
 	if err != nil {
 		logging.Fatal(
