@@ -2,7 +2,9 @@ package scrapper
 
 import (
 	"database/sql"
+	"fmt"
 	"go-scraper-learning/internal/logging"
+	"strings"
 )
 
 func CreateDatabaseSQLite(db *sql.DB) {
@@ -27,6 +29,31 @@ func CreateDatabaseSQLite(db *sql.DB) {
 	)
 }
 
-func InsertBooks(books []BookRegisterDTO) {
-	query := ``
+func InsertBooks(db *sql.DB, books *BooksPage) (*BooksPage) {
+	var sb strings.Builder
+	fmt.Fprint(&sb, "INSERT INTO books (title, rating, price) ")
+	//query := "INSERT INTO books (title, rating, price) "
+	for _, book := range books.Books {
+		fmt.Fprintf(
+			&sb,
+			"VALUES(%s, %d, %f),",
+			strings.TrimSpace(book.Title),
+			book.Rating,
+			book.Price,
+		)
+	}
+	query := sb.String()
+	query = strings.TrimSuffix(query, ",")
+	query = query + ";"
+
+	_, err := db.Exec(query)
+	if err != nil {
+		logging.Error(
+			"Books insertion went wrong.",
+			logging.ErrorType(err),
+		)
+		return books
+	}
+	
+	return nil
 }

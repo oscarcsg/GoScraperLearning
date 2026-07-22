@@ -12,3 +12,8 @@ type BookRegisterDTO struct {
 	Rating int8    `json:"rating"`
 	Price  float32 `json:"pricing"`
 }
+
+type BooksPage struct {
+	WebPage uint16
+	Books   []BookRegisterDTO
+}
