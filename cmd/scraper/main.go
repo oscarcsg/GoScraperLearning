@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-scraper-learning/internal/config"
+	"go-scraper-learning/internal/database"
 	"go-scraper-learning/internal/logging"
 )
 
@@ -28,4 +29,13 @@ func main() {
 	)
 
 	logging.Always(initialMsg)
+
+	db, err := database.Init(appConfig.DBConfig)
+	if err != nil {
+		logging.Fatal(
+			"Database initialization failed.",
+			logging.ErrorType(err),
+		)
+	}
+	defer db.Close()
 }

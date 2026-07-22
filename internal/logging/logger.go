@@ -172,6 +172,19 @@ func Error(msg string, fields ...Field) {
 	}
 }
 
+func Errors(msg string, errors []error, fields ...Field) {
+	// Create the message adding the errors
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "%s\n\n", msg) // Add the main message
+	if len(errors) > 0 {
+		fmt.Fprintf(&sb, "%s\n", "Error list:")
+		for _, err := range errors {
+			fmt.Fprintf(&sb, "%s\n", err.Error())
+		}
+	}
+	Error(sb.String(), fields...)
+}
+
 func Fatal(msg string, fields ...Field) {
 	if FATAL >= minLevels.ExternalLogMinLevel {
 		queueAlert(FATAL, msg, fields)

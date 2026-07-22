@@ -39,6 +39,9 @@ libraries.md
 # log files
 logs/
 
+# development databases directory
+database-dev/
+
 # Editor/IDE
 # .idea/
 .vscode/

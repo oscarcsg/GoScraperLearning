@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"go-scraper-learning/internal/database"
 	"go-scraper-learning/internal/logging"
 	"go-scraper-learning/internal/util"
 	"os"
@@ -27,6 +28,11 @@ func LoadConfig() AppConfig {
 		os.Exit(1)
 	}
 
+	dbConfig := database.DatabaseConfig{
+		DBEngine: dbEngine,
+		DBConnString: dbString,
+	}
+
 	logConfig := loadLogConfig()
 
 	extLogConfig := loadExternalLogConfig()
@@ -34,8 +40,7 @@ func LoadConfig() AppConfig {
 	return AppConfig{
 		ExtLogs: extLogConfig,
 		Logs: logConfig,
-		DBEngine: dbEngine,
-		DBString: dbString,
+		DBConfig: dbConfig,
 	}
 }
 
@@ -60,7 +65,7 @@ func loadDatabaseConfig() (string, string, error) {
 			return "", "", fmt.Errorf("FATAL: SQLite database path MUST be defined.")
 		}
 		return engine,
-			   fmt.Sprintf("%s?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)", dbPath),
+			   fmt.Sprintf("file:%s?_pragma=journal_mode(WAL)&_pragma=synchronous(NORMAL)", dbPath),
 			   nil
 
 	case "postgresql", "mysql", "mariadb":

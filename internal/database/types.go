@@ -1,6 +1,6 @@
-package config
+package database
 
-type DatabaseConfig struct {
+type FullDatabaseConfig struct {
 	DBEngine       string
 	DBSQLite       string
 	DBUser         string
@@ -8,4 +8,9 @@ type DatabaseConfig struct {
 	DBIpUrl        string
 	DBPort         string
 	DBName         string
+}
+
+type DatabaseConfig struct {
+	DBEngine     string
+	DBConnString string
 }
