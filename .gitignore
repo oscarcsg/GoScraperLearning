@@ -41,6 +41,7 @@ logs/
 
 # development databases directory
 database-dev/
+historial/
 
 # Editor/IDE
 # .idea/

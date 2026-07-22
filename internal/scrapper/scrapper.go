@@ -12,5 +12,6 @@ func Init(baseUrlToScrap string, filePathName string) {
 	}
 	defer historialFile.Close()
 
-	
+	// Petition to the URL
+
 }

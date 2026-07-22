@@ -42,6 +42,9 @@ func main() {
 		)
 	}
 	defer db.Close()
+	if appConfig.DBConfig.DBEngine == "sqlite" {
+		scrapper.CreateDatabaseSQLite(db)
+	}
 
 	// --- SCRAPPER --- //
 	scrapper.Init(
