@@ -5,6 +5,7 @@ import (
 	"go-scraper-learning/internal/database"
 	"go-scraper-learning/internal/logging"
 	"go-scraper-learning/internal/util"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -83,8 +84,9 @@ func loadDatabaseConfig() (string, string, error) {
 			return engine,
 				fmt.Sprintf(
 					"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-					values[0],
-					values[1],
+					// QueryEscape turns automatically the invalid chars in urls to valid codes
+					url.QueryEscape(values[0]),
+					url.QueryEscape(values[1]),
 					values[2],
 					values[3],
 					values[4],

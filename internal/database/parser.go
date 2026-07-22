@@ -10,7 +10,7 @@ func parseDriver(base string) (string) {
 
 	switch base {
 	case "postgresql", "postgres":
-		return "postgres"
+		return "pgx"
 	case "mysql", "mariadb":
 		return "mysql"
 	case "sqlite", "sqlite3":
