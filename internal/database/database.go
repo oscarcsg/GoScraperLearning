@@ -101,6 +101,7 @@ func getEngineAndConnString(config DatabaseConfig) (string, string, bool) {
 }
 
 func createSQLiteDBDirectory(connString string) (bool) {
+	connString = strings.ReplaceAll(connString, "file:", "")
 	rootDirectory := strings.HasPrefix(connString, "/")
 	directories := strings.Split(strings.Split(connString, "?")[0], "/")
 
@@ -112,9 +113,6 @@ func createSQLiteDBDirectory(connString string) (bool) {
 
 	for _, directory := range directories {
 		if directory != "" && !strings.Contains(directory, ".db") {
-			if strings.Contains(directory, "file:") {
-				directory = strings.ReplaceAll(directory, "file:", "", )
-			}
 			// Valid directory
 			fmt.Fprintf(&sb, "%s/", directory)
 		}
