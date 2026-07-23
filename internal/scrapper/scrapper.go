@@ -1,7 +1,7 @@
 package scrapper
 
 import (
-	"fmt"
+	"database/sql"
 	"go-scraper-learning/internal/logging"
 	"math"
 	"net/http"
@@ -13,7 +13,7 @@ import (
 
 var pageCounter int
 
-func Init(baseUrlToScrap string, filePathName string) {
+func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
 	historialFile, historialErr := createHistorialBaseFile(baseUrlToScrap, filePathName)
 	if historialErr != nil {
 		logging.Error(
@@ -23,22 +23,37 @@ func Init(baseUrlToScrap string, filePathName string) {
 	}
 	defer historialFile.Close()
 
-	pageCounter = 1
+	pageCounter = 0
 
-	booksPages := make([]BooksPage, 0, 1) // 50 because I know there are 50 html pages
+	booksPages := make([]BooksPage, 0, 50) // 50 because I know there are 50 html pages
+	// this is the best to make slices, even if i dont know how much im going to need
+	// if it needs more space, it will ask for it, but for the preassigned space wont
 
-	// Petition to the URL
-	booksPages = append(
-		booksPages,
-		BooksPage{
+	for range 50 {
+		books, isNext := scrapping(baseUrlToScrap)
+
+		booksPage := BooksPage {
 			WebPage: uint16(pageCounter),
-			Books: scrapping(baseUrlToScrap),
-		},
-	)
+			Books: books,
+		}
+
+		// Petition to the URL
+		booksPages = append(
+			booksPages,
+			booksPage,
+		)
+
+		InsertBooks(db, &booksPage)
+
+		if !isNext {
+			break
+		}
+	}
 
 	
 
-	for _, bookpage := range booksPages {
+	// ======= DEBUG ======= //
+	/*for _, bookpage := range booksPages {
 		fmt.Printf(
 			"\nWeb page: %d",
 			bookpage.WebPage,
@@ -52,10 +67,11 @@ func Init(baseUrlToScrap string, filePathName string) {
 				book.Price,
 			)
 		}
-	}
+	}*/
 }
 
-func scrapping(url string) ([]BookRegisterDTO) {
+func scrapping(url string) ([]BookRegisterDTO, bool) {
+	pageCounter++
 	url = adaptPageUrl(url, pageCounter)
 	res, err := http.Get(url)
 	if err != nil {
@@ -122,10 +138,16 @@ func scrapping(url string) ([]BookRegisterDTO) {
 		)
 	})
 
-	if len(booksRegisters) > 0 {
-		return booksRegisters
+	isMorePages := false
+	_, exists := doc.Find(".next a").Attr("href")
+	if exists {
+		isMorePages = true
 	}
-	return nil
+
+	if len(booksRegisters) > 0 {
+		return booksRegisters, isMorePages
+	}
+	return nil, isMorePages
 }
 
 func adaptPageUrl(url string, number int) (string) {

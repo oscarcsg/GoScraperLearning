@@ -50,5 +50,6 @@ func main() {
 	scrapper.Init(
 		"https://books.toscrape.com/catalogue/page-X.html",
 		"historial/historial-dev.txt",
+		db,
 	)
 }

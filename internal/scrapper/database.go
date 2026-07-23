@@ -12,7 +12,7 @@ func CreateDatabaseSQLite(db *sql.DB) {
 			  	id     INTEGER PRIMARY KEY AUTOINCREMENT,
 			  	title  TEXT NOT NULL,
 				rating TINYINT NOT NULL DEFAULT 0,
-				price  DOUBLE NOT NULL DEFAULT 0.0);`
+				price  BIGINT NOT NULL DEFAULT 0);`
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -31,28 +31,43 @@ func CreateDatabaseSQLite(db *sql.DB) {
 
 func InsertBooks(db *sql.DB, books *BooksPage) (*BooksPage) {
 	var sb strings.Builder
-	fmt.Fprint(&sb, "INSERT INTO books (title, rating, price) ")
-	//query := "INSERT INTO books (title, rating, price) "
-	for _, book := range books.Books {
-		fmt.Fprintf(
-			&sb,
-			"VALUES(%s, %d, %d),",
+	fmt.Fprint(&sb, "INSERT INTO books (title, rating, price) VALUES ")
+
+	var args []any
+	for i, book := range books.Books {
+		sb.WriteString("(?, ?, ?)")
+
+		// If it is not the last one, write a coma
+		if i < len(books.Books)-1 {
+			sb.WriteString(", ")
+		} else {
+			sb.WriteString(";")
+		}
+
+		args = append(
+			args,
 			strings.TrimSpace(book.Title),
 			book.Rating,
 			book.Price,
 		)
 	}
 	query := sb.String()
-	query = strings.TrimSuffix(query, ",")
-	query = query + ";"
 
-	_, err := db.Exec(query)
+	//fmt.Println(query)
+
+	_, err := db.Exec(query, args...)
 	if err != nil {
 		logging.Error(
 			"Books insertion went wrong.",
 			logging.ErrorType(err),
 		)
 		return books
+	} else {
+		logging.Info(
+			"Book page inserted in the database successfully.",
+			logging.Uint16Type("web_page", books.WebPage),
+			logging.IntType("books_count", len(books.Books)),
+		)
 	}
 	
 	return nil
