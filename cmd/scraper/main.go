@@ -48,7 +48,7 @@ func main() {
 
 	// --- SCRAPPER --- //
 	scrapper.Init(
-		"https://books.toscrape.com/",
+		"https://books.toscrape.com/catalogue/page-X.html",
 		"historial/historial-dev.txt",
 	)
 }

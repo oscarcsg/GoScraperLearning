@@ -53,7 +53,7 @@ func createHistorialBaseFile(baseUrl string, filePathName string) (*os.File, err
 		}
 	}
 
-	if baseUrl != "" {
+	/*if baseUrl != "" {
 		_, err = file.WriteString(baseUrl)
 		if err != nil {
 			logging.Error(
@@ -64,7 +64,7 @@ func createHistorialBaseFile(baseUrl string, filePathName string) (*os.File, err
 			)
 			return nil, err
 		}
-	}
+	}*/
 
 	return file, nil
 }
