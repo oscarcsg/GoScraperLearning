@@ -29,7 +29,7 @@ func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
 	// this is the best to make slices, even if i dont know how much im going to need
 	// if it needs more space, it will ask for it, but for the preassigned space wont
 
-	for range 50 {
+	for {
 		books, isNext := scrapping(baseUrlToScrap)
 
 		booksPage := BooksPage {
