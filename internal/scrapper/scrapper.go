@@ -3,6 +3,7 @@ package scrapper
 import (
 	"fmt"
 	"go-scraper-learning/internal/logging"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ func Init(baseUrlToScrap string, filePathName string) {
 
 		for _, book := range bookpage.Books {
 			fmt.Printf(
-				"\n\tBook:\n\t\tTitle: %s\n\t\tRating: %d\n\t\tPrice: %f",
+				"\n\tBook:\n\t\tTitle: %s\n\t\tRating: %d\n\t\tPrice: %d",
 				book.Title,
 				book.Rating,
 				book.Price,
@@ -103,7 +104,7 @@ func scrapping(url string) ([]BookRegisterDTO) {
 		}
 
 		priceStr := sel.Find(".price_color").Text()
-		price, err := strconv.ParseFloat(strings.ReplaceAll(priceStr, "£", ""), 32)
+		price, err := strconv.ParseFloat(strings.ReplaceAll(priceStr, "£", ""), 64)
 		if err != nil {
 			logging.Error(
 				"Parse string to float32 error.",
@@ -116,7 +117,7 @@ func scrapping(url string) ([]BookRegisterDTO) {
 			BookRegisterDTO{
 				Title: title,
 				Rating: rating,
-				Price: float32(price),
+				Price: uint64(math.Round(price * 100)), // Store in cents
 			},
 		)
 	})

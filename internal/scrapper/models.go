@@ -4,13 +4,13 @@ type Book struct {
 	Id     int32   `json:"id"`
 	Title  string  `json:"title"`
 	Rating int8    `json:"rating"`
-	Price  float32 `json:"pricing"`
+	Price  uint64 `json:"pricing"`// Cents
 }
 
 type BookRegisterDTO struct {
 	Title  string  `json:"title"`
 	Rating int8    `json:"rating"`
-	Price  float32 `json:"pricing"`
+	Price  uint64 `json:"pricing"` // Cents
 }
 
 type BooksPage struct {

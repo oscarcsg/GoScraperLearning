@@ -36,7 +36,7 @@ func InsertBooks(db *sql.DB, books *BooksPage) (*BooksPage) {
 	for _, book := range books.Books {
 		fmt.Fprintf(
 			&sb,
-			"VALUES(%s, %d, %f),",
+			"VALUES(%s, %d, %d),",
 			strings.TrimSpace(book.Title),
 			book.Rating,
 			book.Price,
