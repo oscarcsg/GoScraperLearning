@@ -25,7 +25,7 @@ func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
 
 	pageCounter = 0
 
-	booksPages := make([]BooksPage, 0, 50) // 50 because I know there are 50 html pages
+	//booksPages := make([]BooksPage, 0, 50) // 50 because I know there are 50 html pages
 	// this is the best to make slices, even if i dont know how much im going to need
 	// if it needs more space, it will ask for it, but for the preassigned space wont
 
@@ -38,10 +38,10 @@ func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
 		}
 
 		// Petition to the URL
-		booksPages = append(
+		/*booksPages = append(
 			booksPages,
 			booksPage,
-		)
+		)*/
 
 		InsertBooks(db, &booksPage)
 
