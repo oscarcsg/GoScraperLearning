@@ -13,7 +13,7 @@ import (
 
 var pageCounter int
 
-func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
+func Init(baseUrlToScrap string, filePathName string, db *sql.DB, engine string) {
 	historialFile, historialErr := createHistorialBaseFile(baseUrlToScrap, filePathName)
 	if historialErr != nil {
 		logging.Error(
@@ -43,7 +43,7 @@ func Init(baseUrlToScrap string, filePathName string, db *sql.DB) {
 			booksPage,
 		)*/
 
-		InsertBooks(db, &booksPage)
+		InsertBooks(db, &booksPage, engine)
 
 		if !isNext {
 			break

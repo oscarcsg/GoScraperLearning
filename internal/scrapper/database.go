@@ -29,13 +29,26 @@ func CreateDatabaseSQLite(db *sql.DB) {
 	)
 }
 
-func InsertBooks(db *sql.DB, books *BooksPage) (*BooksPage) {
+func InsertBooks(db *sql.DB, books *BooksPage, engine string) (*BooksPage) {
 	var sb strings.Builder
 	fmt.Fprint(&sb, "INSERT INTO books (title, rating, price) VALUES ")
 
 	var args []any
+	placeHolderIndex := 1
+
 	for i, book := range books.Books {
-		sb.WriteString("(?, ?, ?)")
+		if engine == "postgresql" || engine == "postgres" || engine == "pgx"{
+			fmt.Fprintf(
+				&sb,
+				"($%d, $%d, $%d)",
+				placeHolderIndex,
+				placeHolderIndex+1,
+				placeHolderIndex+2,
+			)
+			placeHolderIndex += 3
+		} else {
+			sb.WriteString("(?, ?, ?)")
+		}
 
 		// If it is not the last one, write a coma
 		if i < len(books.Books)-1 {

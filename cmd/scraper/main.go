@@ -51,5 +51,6 @@ func main() {
 		"https://books.toscrape.com/catalogue/page-X.html",
 		"historial/historial-dev.txt",
 		db,
+		appConfig.DBConfig.DBEngine,
 	)
 }
